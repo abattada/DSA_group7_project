@@ -3,7 +3,7 @@ const pool = document.getElementById('pool');
 const bucketsContainer = document.getElementById('buckets');
 const timerDisplay = document.getElementById('timer');
 const phaseDisplay = document.getElementById('phase');
-const startModal = new bootstrap.Modal(document.getElementById('startModal'));
+//const startModal = new bootstrap.Modal(document.getElementById('startModal'));
 const startGameButton = document.getElementById('startGameButton');
 const scoreBoard = document.getElementById('scoreBoard');
 
@@ -12,7 +12,7 @@ let numbers = [];
 let elapsed = 0;
 let timer;
 let phase = 0;
-let numberOfNumbers = 10;
+let numberOfNumbers = 1;
 let maxNumber = 9999; // 根據難度變化
 let playerName = '';
 
@@ -31,12 +31,17 @@ function show_modal(title, message) {
     modal.show();
   });
 }
+function getDifficulty() {
+  const difficulty = document.getElementById('difficulty').value;
+  return difficulty === 'easy' ? 0 : difficulty === 'medium' ? 1 : 2;
+}
 
 function updateScoreBoard() {
-  const scores = JSON.parse(localStorage.getItem('radixScores') || '[]');
+  const all_scores = JSON.parse(localStorage.getItem('radixScores') || '[[],[],[]]');
+  const scores = all_scores[getDifficulty()];
   scores.sort((a, b) => a.time - b.time);
   scoreBoard.innerHTML = '';
-  scores.slice(0, 5).forEach(score => {
+  scores.forEach(score => {
     const li = document.createElement('li');
     li.className = 'list-group-item';
     li.textContent = `${score.name}: ${score.time} 秒`;
@@ -45,9 +50,9 @@ function updateScoreBoard() {
 }
 
 function saveScore(name, time) {
-  const scores = JSON.parse(localStorage.getItem('radixScores') || '[]');
-  scores.push({ name, time });
-  localStorage.setItem('radixScores', JSON.stringify(scores));
+  const all_scores = JSON.parse(localStorage.getItem('radixScores') || '[[],[],[]]');
+  all_scores[getDifficulty()].push({ name, time });
+  localStorage.setItem('radixScores', JSON.stringify(all_scores));
 }
 
 startGameButton.addEventListener('click', () => {
@@ -59,8 +64,7 @@ startGameButton.addEventListener('click', () => {
   playerName = nameInput.value;
   const difficulty = difficultyInput.value;
   maxNumber = difficulty === 'easy' ? 99 : difficulty === 'medium' ? 999 : 9999;
-
-  startModal.hide();
+  showGame();
   startGame();
 });
 
@@ -70,7 +74,7 @@ function startGame() {
   renderPool(numbers);
   bucketsContainer.innerHTML = '';
 
-  for (let i = 0; i < numberOfNumbers; i++) {
+  for (let i = 0; i < 10; i++) {
     const container = document.createElement('div');
     container.className = 'bucket-container';
 
@@ -147,6 +151,11 @@ function startGame() {
   timerDisplay.textContent = `時間：0 秒`;
   phaseDisplay.textContent = `目前排序：${digitLabels[phase]}`;
   timer = setInterval(() => {
+    const myModalElement = document.getElementById('myModal');
+    const myModal = bootstrap.Modal.getOrCreateInstance(myModalElement);
+    if (myModal._isShown) {
+      return;
+    }
     elapsed++;
     timerDisplay.textContent = `時間：${elapsed} 秒`;
   }, 1000);
@@ -169,7 +178,7 @@ function submit() {
   let collected = [];
   let correctBucket = true;
 
-  for (let i = 0; i < numberOfNumbers; i++) {
+  for (let i = 0; i < 10; i++) {
     const bucket = document.getElementById(`bucket-${i}`);
     const blocks = [...bucket.children];
 
@@ -191,7 +200,7 @@ function submit() {
       wait_model.then(() => {
         saveScore(playerName, elapsed);
         updateScoreBoard();
-        startModal.show();
+        hideGame();
       });
     } else {
       wait_model = show_modal("完成", `✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
@@ -215,11 +224,23 @@ function isStableSorted(current, original, digitPlace) {
 }
 
 function clearBuckets() {
-  for (let i = 0; i < numberOfNumbers; i++) {
+  for (let i = 0; i < 10; i++) {
     document.getElementById(`bucket-${i}`).innerHTML = '';
   }
 }
 
+function showGame(){
+  document.getElementById("game_area").style.display = "block";
+  document.getElementById("start_area").style.display = "none";
+}
+
+function hideGame(){
+  document.getElementById("game_area").style.display = "none";
+  document.getElementById("start_area").style.display = "block";
+}
+
 // 初始顯示排行榜與表單
 updateScoreBoard();
-startModal.show();
+hideGame();
+
+document.getElementById("difficulty").addEventListener("change", updateScoreBoard);
