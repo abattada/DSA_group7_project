@@ -181,7 +181,7 @@ function submit() {
     });
   } else {
     elapsed += 30;
-    show_modal("錯誤", `❌ ${digitLabels[phase]} 排序錯誤，已加時 5 秒`);
+    show_modal("錯誤", `❌ ${digitLabels[phase]} 排序錯誤，已加時 30 秒`);
     // alert(`❌ ${digitLabels[phase]} 排序順序錯誤，已加時 30 秒`);
   }
 }
