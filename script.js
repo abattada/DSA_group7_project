@@ -148,8 +148,8 @@ function submit() {
   }
 
   if (collected.length !== numbers.length) {
-    show_modal("錯誤", "請將所有數字放入桶子中！");
-    // alert("請將所有數字放入桶子中！");
+    // show_modal("錯誤", "請將所有數字放入桶子中！");
+    alert("請將所有數字放入桶子中！");
     return;
   }
 
@@ -158,11 +158,11 @@ function submit() {
   if (isCorrect) {
     if (phase === 3) {
       clearInterval(timer);
-      show_modal("恭喜!", `🎉 全部排序完成！總時間：${elapsed} 秒`);
-      // alert(`🎉 全部排序完成！總時間：${elapsed} 秒`);
+     // show_modal("恭喜!", `🎉 全部排序完成！總時間：${elapsed} 秒`);
+      alert(`🎉 全部排序完成！總時間：${elapsed} 秒`);
     } else {
-      show_modal("完成", `✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
-      // alert(`✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
+      //show_modal("完成", `✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
+      alert(`✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
     }
 
     numbers = collected.slice();
@@ -174,8 +174,8 @@ function submit() {
     }
   } else {
     elapsed += 5;
-    show_modal("錯誤", `❌ ${digitLabels[phase]} 排序錯誤，已加時 5 秒`);
-    // alert(`❌ ${digitLabels[phase]} 排序錯誤，已加時 5 秒`);
+    // show_modal("錯誤", `❌ ${digitLabels[phase]} 排序錯誤，已加時 5 秒`);
+    alert(`❌ ${digitLabels[phase]} 排序錯誤，已加時 5 秒`);
   }
 }
 
