@@ -161,15 +161,16 @@ function submit() {
   const isCorrect = isStableSorted(collected, numbers, phase);
 
   if (isCorrect && collected.length == numbers.length && correctBucket) {
+    let wait_model;
     if (phase === 3) {
       clearInterval(timer);
-     // show_modal("恭喜!", `🎉 全部排序完成！總時間：${elapsed} 秒`);
-      alert(`🎉 全部排序完成！總時間：${elapsed} 秒`);
+      wait_model = show_modal("恭喜!", `🎉 全部排序完成！總時間：${elapsed} 秒`);
+      // alert(`🎉 全部排序完成！總時間：${elapsed} 秒`);
     } else {
-      //show_modal("完成", `✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
-      alert(`✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
+      wait_model = show_modal("完成", `✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
+      // alert(`✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
     }
-
+    wait_model.then(()=>{
     numbers = collected.slice();
     renderPool(numbers);
     clearBuckets();
@@ -177,10 +178,11 @@ function submit() {
     if (phase < 4) {
       phaseDisplay.textContent = `目前排序：${digitLabels[phase]}`;
     }
+    });
   } else {
     elapsed += 30;
-    // show_modal("錯誤", `❌ ${digitLabels[phase]} 排序錯誤，已加時 5 秒`);
-    alert(`❌ ${digitLabels[phase]} 排序順序錯誤，已加時 30 秒`);
+    show_modal("錯誤", `❌ ${digitLabels[phase]} 排序錯誤，已加時 5 秒`);
+    // alert(`❌ ${digitLabels[phase]} 排序順序錯誤，已加時 30 秒`);
   }
 }
 
