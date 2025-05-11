@@ -7,6 +7,7 @@ let numbers = [];
 let elapsed = 0;
 let timer;
 let phase = 0;
+let numberOfNumbers = 10;
 const digitLabels = ['個位數', '十位數', '百位數', '千位數'];
 
 function getDigit(num, place) {
@@ -14,11 +15,11 @@ function getDigit(num, place) {
 }
 
 function startGame() {
-  numbers = Array.from({ length: 10 }, () => Math.floor(Math.random() * 9999) + 1);
+  numbers = Array.from({ length: numberOfNumbers }, () => Math.floor(Math.random() * 9999) + 1);
   renderPool(numbers);
   bucketsContainer.innerHTML = '';
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < numberOfNumbers; i++) {
     const container = document.createElement('div');
     container.className = 'bucket-container';
 
@@ -140,7 +141,7 @@ function submit() {
   let collected = [];       // 用來記錄排序順序
   let correctBucket = true; // 是否放在對應 bucket
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < numberOfNumbers; i++) {
     const bucket = document.getElementById(`bucket-${i}`);
     const blocks = [...bucket.children];
 
@@ -160,13 +161,13 @@ function submit() {
   // 檢查是否排序正確（穩定排序）
   const isCorrect = isStableSorted(collected, numbers, phase);
 
-  if (isCorrect && collected.length == numbers.length && correctBucket) {
+  if (isCorrect && collected.length == numberOfNumbers && correctBucket) {
     if (phase === 3) {
       clearInterval(timer);
      // show_modal("恭喜!", `🎉 全部排序完成！總時間：${elapsed} 秒`);
       alert(`🎉 全部排序完成！總時間：${elapsed} 秒`);
     } else {
-      //show_modal("完成", `✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
+      // show_modal("完成", `✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
       alert(`✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
     }
 
@@ -175,7 +176,7 @@ function submit() {
     clearBuckets();
     phase++;
     if (phase < 4) {
-      phaseDisplay.textContent = `目前排序：${digitLabels[phase]}`;
+      // phaseDisplay.textContent = `目前排序：${digitLabels[phase]}`;
     }
   } else {
     elapsed += 30;
@@ -193,7 +194,7 @@ function isStableSorted(current, original, digitPlace) {
 }
 
 function clearBuckets() {
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < numberOfNumbers; i++) {
     document.getElementById(`bucket-${i}`).innerHTML = '';
   }
 }
