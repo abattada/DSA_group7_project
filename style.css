@@ -22,6 +22,7 @@ body {
   border-radius: 8px;
   cursor: grab;
   user-select: none;
+  width: 70px;
 }
 
 .number-block.disabled {

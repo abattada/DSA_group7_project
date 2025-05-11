@@ -3,6 +3,11 @@ const myModal = bootstrap.Modal.getOrCreateInstance(myModalElement);
 
 function show_modal(title, message){
     return new Promise((resolve) => {
+        window.setTimeout(()=>{
+            if (myModal._isShown){
+                myModal.hide();
+            }
+        },3000);
         myModalElement.focus();
         document.getElementById('myModalTitle').textContent = title;
         document.getElementById('myModalText').textContent = message;

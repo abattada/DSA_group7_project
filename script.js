@@ -22,16 +22,6 @@ const digitLabels = ['個位數', '十位數', '百位數', '千位數'];
 function getDigit(num, place) {
   return Math.floor(num / Math.pow(10, place)) % 10;
 }
-
-function show_modal(title, message) {
-  return new Promise((resolve) => {
-    document.getElementById('myModalTitle').textContent = title;
-    document.getElementById('myModalText').textContent = message;
-    const modal = new bootstrap.Modal(document.getElementById('myModal'));
-    document.getElementById('myModal').addEventListener('hidden.bs.modal', () => resolve(), { once: true });
-    modal.show();
-  });
-}
 function getDifficulty() {
   const difficulty = document.getElementById('difficulty').value;
   return difficulty === 'easy' ? 0 : difficulty === 'medium' ? 1 : 2;
@@ -207,13 +197,13 @@ function submit() {
       });
     } else {
       wait_model = show_modal("完成", `✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
-      wait_model.then(() => {
+      //wait_model.then(() => {
         numbers = collected.slice();
         renderPool(numbers);
         clearBuckets();
         phase++;
         phaseDisplay.textContent = `目前排序：${digitLabels[phase]}`;
-      });
+      //});
     }
   } else {
     elapsed += 30;
