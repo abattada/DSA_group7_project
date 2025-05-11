@@ -124,7 +124,7 @@ function renderPool(arr) {
   arr.forEach((num, index) => {
     const block = document.createElement('div');
     block.className = 'number-block';
-    block.textContent = num;
+    block.textContent = num.toString().padStart(4, '0');
     block.dataset.value = num;
     block.dataset.originalIndex = index;
 
