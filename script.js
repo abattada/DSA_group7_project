@@ -12,7 +12,8 @@ let numbers = [];
 let elapsed = 0;
 let timer;
 let phase = 0;
-let numberOfNumbers = 1;
+let numberOfNumbers = 30;
+let numbersOfDifficulty = [5, 10, 15]; // easy, medium, hard
 let maxNumber = 9999; // 根據難度變化
 let playerName = '';
 
@@ -70,6 +71,8 @@ startGameButton.addEventListener('click', () => {
 
 function startGame() {
   phase = 0;
+  const difficulty = getDifficulty();
+  numberOfNumbers = numbersOfDifficulty[difficulty];
   numbers = Array.from({ length: numberOfNumbers }, () => Math.floor(Math.random() * maxNumber) + 1);
   renderPool(numbers);
   bucketsContainer.innerHTML = '';
