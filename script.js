@@ -177,7 +177,7 @@ function submit() {
     clearBuckets();
     phase++;
     if (phase < 4) {
-      // phaseDisplay.textContent = `目前排序：${digitLabels[phase]}`;
+      phaseDisplay.textContent = `目前排序：${digitLabels[phase]}`;
     }
     });
   } else {
