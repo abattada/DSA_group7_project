@@ -37,15 +37,77 @@ function startGame() {
     Sortable.create(bucket, {
       group: 'shared',
       animation: 150,
-      sort: true
+      sort: true,
+      onAdd: function (evt) {
+        // 無需處理拖入 bucket 的邏輯
+      },
+      onRemove: function (evt) {
+        // 只在目標是 pool 時刪除複製品
+        if (evt.to === pool) {
+          const value = evt.item.dataset.value;
+          const disabledClones = pool.querySelectorAll('.number-block.disabled');
+          for (const clone of disabledClones) {
+            if (clone.dataset.value === value) {
+              clone.remove();
+              // 恢復可再拖曳
+              evt.item.dataset.fromPool = "true";
+              break;
+            }
+          }
+        }
+      }
+      
     });
+    
   }
 
+    // Pool（數字池）拖曳設定
   Sortable.create(pool, {
     group: 'shared',
     animation: 150,
-    sort: false
+    sort: false,
+    onAdd: function (evt) {
+      const block = evt.item;
+    
+      // 只處理 bucket ➝ pool 的情況（fromPool == false）
+      if (block.dataset.fromPool === "false") {
+        const index = parseInt(block.dataset.originalIndex);
+        const blocks = Array.from(pool.children);
+    
+        // 找到要插入的位置
+        let insertBefore = null;
+        for (let i = 0; i < blocks.length; i++) {
+          const b = blocks[i];
+          const bi = parseInt(b.dataset.originalIndex);
+          if (!isNaN(bi) && bi > index) {
+            insertBefore = b;
+            break;
+          }
+        }
+    
+        pool.insertBefore(block, insertBefore);
+      }
+    },    
+    onEnd: function (evt) {
+      // 判斷是否從 pool 拖出去
+      const block = evt.item;
+      if (evt.from === pool && evt.to !== pool && block.dataset.fromPool === "true") {
+        // 建立複製品留在原位
+        const clone = block.cloneNode(true);
+        clone.classList.add('disabled');
+        clone.draggable = false;
+        clone.dataset.disabled = "true";
+        pool.insertBefore(clone, pool.children[evt.oldIndex]);
+
+        // 標記已拖出（防止再次複製）
+        block.dataset.fromPool = "false";
+      }
+    }
   });
+
+
+
+  
 
   clearInterval(timer);
   elapsed = 0;
@@ -58,14 +120,20 @@ function startGame() {
 
 function renderPool(arr) {
   pool.innerHTML = '';
-  arr.forEach(num => {
+  arr.forEach((num, index) => {
     const block = document.createElement('div');
     block.className = 'number-block';
     block.textContent = num;
     block.dataset.value = num;
+    block.dataset.originalIndex = index;
+
+    // 自訂標記為原始來源
+    block.dataset.fromPool = "true";
+
     pool.appendChild(block);
   });
 }
+
 
 function submit() {
   let collected = [];
