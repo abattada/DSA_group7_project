@@ -24,6 +24,11 @@ body {
   user-select: none;
 }
 
+.number-block.disabled {
+  background-color: lightgray;
+  cursor: not-allowed;
+}
+
 #timer {
   margin-bottom: 10px;
   font-size: 18px;

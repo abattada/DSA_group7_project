@@ -66,6 +66,7 @@ function startGame() {
     group: 'shared',
     animation: 150,
     sort: false,
+    filter: ".disabled",
     onAdd: function (evt) {
       const block = evt.item;
     
@@ -162,8 +163,10 @@ function submit() {
   if (isCorrect && collected.length == numbers.length && correctBucket) {
     if (phase === 3) {
       clearInterval(timer);
+     // show_modal("恭喜!", `🎉 全部排序完成！總時間：${elapsed} 秒`);
       alert(`🎉 全部排序完成！總時間：${elapsed} 秒`);
     } else {
+      //show_modal("完成", `✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
       alert(`✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
     }
 
@@ -176,6 +179,7 @@ function submit() {
     }
   } else {
     elapsed += 30;
+    // show_modal("錯誤", `❌ ${digitLabels[phase]} 排序錯誤，已加時 5 秒`);
     alert(`❌ ${digitLabels[phase]} 排序順序錯誤，已加時 30 秒`);
   }
 }
