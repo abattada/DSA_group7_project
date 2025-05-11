@@ -103,7 +103,9 @@ function startGame() {
       }
     });
   }
-
+  if (Sortable.get(pool)) {
+    Sortable.get(pool).destroy();
+  }
   Sortable.create(pool, {
     group: 'shared',
     animation: 150,
