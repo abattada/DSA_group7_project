@@ -136,24 +136,30 @@ function renderPool(arr) {
 
 
 function submit() {
-  let collected = [];
+  let collected = [];       // 用來記錄排序順序
+  let correctBucket = true; // 是否放在對應 bucket
 
   for (let i = 0; i < 10; i++) {
     const bucket = document.getElementById(`bucket-${i}`);
-    const blocks = [...bucket.children].reverse();
+    const blocks = [...bucket.children];
+
     for (let block of blocks) {
-      collected.push(parseInt(block.dataset.value));
+      const value = parseInt(block.dataset.value);
+      const expectedDigit = getDigit(value, phase);
+
+      // ❗ 檢查是否放在正確 bucket
+      if (expectedDigit !== i) {
+        correctBucket = false;
+      }
+
+      collected.push(value);
     }
   }
 
-  if (collected.length !== numbers.length) {
-    alert("請將所有數字放入桶子中！");
-    return;
-  }
-
+  // 檢查是否排序正確（穩定排序）
   const isCorrect = isStableSorted(collected, numbers, phase);
 
-  if (isCorrect) {
+  if (isCorrect && collected.length == numbers.length && correctBucket) {
     if (phase === 3) {
       clearInterval(timer);
       alert(`🎉 全部排序完成！總時間：${elapsed} 秒`);
@@ -169,10 +175,11 @@ function submit() {
       phaseDisplay.textContent = `目前排序：${digitLabels[phase]}`;
     }
   } else {
-    elapsed += 5;
-    alert(`❌ ${digitLabels[phase]} 排序錯誤，已加時 5 秒`);
+    elapsed += 30;
+    alert(`❌ ${digitLabels[phase]} 排序順序錯誤，已加時 30 秒`);
   }
 }
+
 
 function isStableSorted(current, original, digitPlace) {
   const expected = [...original].sort((a, b) => {
