@@ -1,21 +1,72 @@
+// DOM 元素
 const pool = document.getElementById('pool');
 const bucketsContainer = document.getElementById('buckets');
 const timerDisplay = document.getElementById('timer');
 const phaseDisplay = document.getElementById('phase');
+const startModal = new bootstrap.Modal(document.getElementById('startModal'));
+const startGameButton = document.getElementById('startGameButton');
+const scoreBoard = document.getElementById('scoreBoard');
 
+// 遊戲狀態變數
 let numbers = [];
 let elapsed = 0;
 let timer;
 let phase = 0;
 let numberOfNumbers = 10;
+let maxNumber = 9999; // 根據難度變化
+let playerName = '';
+
 const digitLabels = ['個位數', '十位數', '百位數', '千位數'];
 
 function getDigit(num, place) {
   return Math.floor(num / Math.pow(10, place)) % 10;
 }
 
+function show_modal(title, message) {
+  return new Promise((resolve) => {
+    document.getElementById('myModalTitle').textContent = title;
+    document.getElementById('myModalText').textContent = message;
+    const modal = new bootstrap.Modal(document.getElementById('myModal'));
+    document.getElementById('myModal').addEventListener('hidden.bs.modal', () => resolve(), { once: true });
+    modal.show();
+  });
+}
+
+function updateScoreBoard() {
+  const scores = JSON.parse(localStorage.getItem('radixScores') || '[]');
+  scores.sort((a, b) => a.time - b.time);
+  scoreBoard.innerHTML = '';
+  scores.slice(0, 5).forEach(score => {
+    const li = document.createElement('li');
+    li.className = 'list-group-item';
+    li.textContent = `${score.name}: ${score.time} 秒`;
+    scoreBoard.appendChild(li);
+  });
+}
+
+function saveScore(name, time) {
+  const scores = JSON.parse(localStorage.getItem('radixScores') || '[]');
+  scores.push({ name, time });
+  localStorage.setItem('radixScores', JSON.stringify(scores));
+}
+
+startGameButton.addEventListener('click', () => {
+  const nameInput = document.getElementById('playerName');
+  const difficultyInput = document.getElementById('difficulty');
+
+  if (!nameInput.value || !difficultyInput.value) return;
+
+  playerName = nameInput.value;
+  const difficulty = difficultyInput.value;
+  maxNumber = difficulty === 'easy' ? 99 : difficulty === 'medium' ? 999 : 9999;
+
+  startModal.hide();
+  startGame();
+});
+
 function startGame() {
-  numbers = Array.from({ length: numberOfNumbers }, () => Math.floor(Math.random() * 9999) + 1);
+  phase = 0;
+  numbers = Array.from({ length: numberOfNumbers }, () => Math.floor(Math.random() * maxNumber) + 1);
   renderPool(numbers);
   bucketsContainer.innerHTML = '';
 
@@ -39,30 +90,23 @@ function startGame() {
       group: 'shared',
       animation: 150,
       sort: true,
-      onAdd: function (evt) {
-        // 無需處理拖入 bucket 的邏輯
-      },
+      onAdd: () => {},
       onRemove: function (evt) {
-        // 只在目標是 pool 時刪除複製品
         if (evt.to === pool) {
           const value = evt.item.dataset.value;
           const disabledClones = pool.querySelectorAll('.number-block.disabled');
           for (const clone of disabledClones) {
             if (clone.dataset.value === value) {
               clone.remove();
-              // 恢復可再拖曳
               evt.item.dataset.fromPool = "true";
               break;
             }
           }
         }
       }
-      
     });
-    
   }
 
-    // Pool（數字池）拖曳設定
   Sortable.create(pool, {
     group: 'shared',
     animation: 150,
@@ -70,13 +114,9 @@ function startGame() {
     filter: ".disabled",
     onAdd: function (evt) {
       const block = evt.item;
-    
-      // 只處理 bucket ➝ pool 的情況（fromPool == false）
       if (block.dataset.fromPool === "false") {
         const index = parseInt(block.dataset.originalIndex);
         const blocks = Array.from(pool.children);
-    
-        // 找到要插入的位置
         let insertBefore = null;
         for (let i = 0; i < blocks.length; i++) {
           const b = blocks[i];
@@ -86,34 +126,26 @@ function startGame() {
             break;
           }
         }
-    
         pool.insertBefore(block, insertBefore);
       }
-    },    
+    },
     onEnd: function (evt) {
-      // 判斷是否從 pool 拖出去
       const block = evt.item;
       if (evt.from === pool && evt.to !== pool && block.dataset.fromPool === "true") {
-        // 建立複製品留在原位
         const clone = block.cloneNode(true);
         clone.classList.add('disabled');
         clone.draggable = false;
         clone.dataset.disabled = "true";
         pool.insertBefore(clone, pool.children[evt.oldIndex]);
-
-        // 標記已拖出（防止再次複製）
         block.dataset.fromPool = "false";
       }
     }
   });
 
-
-
-  
-
   clearInterval(timer);
   elapsed = 0;
   timerDisplay.textContent = `時間：0 秒`;
+  phaseDisplay.textContent = `目前排序：${digitLabels[phase]}`;
   timer = setInterval(() => {
     elapsed++;
     timerDisplay.textContent = `時間：${elapsed} 秒`;
@@ -128,18 +160,14 @@ function renderPool(arr) {
     block.textContent = num.toString().padStart(4, '0');
     block.dataset.value = num;
     block.dataset.originalIndex = index;
-
-    // 自訂標記為原始來源
     block.dataset.fromPool = "true";
-
     pool.appendChild(block);
   });
 }
 
-
 function submit() {
-  let collected = [];       // 用來記錄排序順序
-  let correctBucket = true; // 是否放在對應 bucket
+  let collected = [];
+  let correctBucket = true;
 
   for (let i = 0; i < numberOfNumbers; i++) {
     const bucket = document.getElementById(`bucket-${i}`);
@@ -148,50 +176,41 @@ function submit() {
     for (let block of blocks) {
       const value = parseInt(block.dataset.value);
       const expectedDigit = getDigit(value, phase);
-
-      // ❗ 檢查是否放在正確 bucket
-      if (expectedDigit !== i) {
-        correctBucket = false;
-      }
-
+      if (expectedDigit !== i) correctBucket = false;
       collected.push(value);
     }
   }
 
-  // 檢查是否排序正確（穩定排序）
   const isCorrect = isStableSorted(collected, numbers, phase);
 
   if (isCorrect && collected.length == numberOfNumbers && correctBucket) {
     let wait_model;
-    if (phase === 3) {
+    if (phase === 3 || maxNumber <= 999 && phase === 2 || maxNumber <= 99 && phase === 1) {
       clearInterval(timer);
       wait_model = show_modal("恭喜!", `🎉 全部排序完成！總時間：${elapsed} 秒`);
-      // alert(`🎉 全部排序完成！總時間：${elapsed} 秒`);
+      wait_model.then(() => {
+        saveScore(playerName, elapsed);
+        updateScoreBoard();
+        startModal.show();
+      });
     } else {
       wait_model = show_modal("完成", `✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
-      // alert(`✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
+      wait_model.then(() => {
+        numbers = collected.slice();
+        renderPool(numbers);
+        clearBuckets();
+        phase++;
+        phaseDisplay.textContent = `目前排序：${digitLabels[phase]}`;
+      });
     }
-    wait_model.then(()=>{
-    numbers = collected.slice();
-    renderPool(numbers);
-    clearBuckets();
-    phase++;
-    if (phase < 4) {
-      phaseDisplay.textContent = `目前排序：${digitLabels[phase]}`;
-    }
-    });
   } else {
     elapsed += 30;
     show_modal("錯誤", `❌ ${digitLabels[phase]} 排序錯誤，已加時 30 秒`);
-    // alert(`❌ ${digitLabels[phase]} 排序順序錯誤，已加時 30 秒`);
   }
 }
 
-
 function isStableSorted(current, original, digitPlace) {
-  const expected = [...original].sort((a, b) => {
-    return getDigit(a, digitPlace) - getDigit(b, digitPlace);
-  });
+  const expected = [...original].sort((a, b) => getDigit(a, digitPlace) - getDigit(b, digitPlace));
   return expected.every((val, idx) => val === current[idx]);
 }
 
@@ -201,4 +220,6 @@ function clearBuckets() {
   }
 }
 
-startGame();
+// 初始顯示排行榜與表單
+updateScoreBoard();
+startModal.show();

@@ -20,6 +20,40 @@
   <h3>排序桶（將數字拖到對應位數的桶中）</h3>
   <div id="buckets"></div>
   <button class="btn btn-secondary btn-lg" onclick="submit()">提交</button>
+  <!-- Add this before the existing modal -->
+<div class="modal fade" id="startModal" tabindex="-1" aria-labelledby="startModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="startModalTitle">開始遊戲</h5>
+      </div>
+      <div class="modal-body">
+        <form id="startForm">
+          <div class="mb-3">
+            <label for="playerName" class="form-label">玩家名稱</label>
+            <input type="text" class="form-control" id="playerName" required />
+          </div>
+          <div class="mb-3">
+            <label for="difficulty" class="form-label">選擇難度</label>
+            <select class="form-select" id="difficulty" required>
+              <option value="easy">簡單</option>
+              <option value="medium">中等</option>
+              <option value="hard">困難</option>
+            </select>
+          </div>
+          <h5>排行榜</h5>
+          <ul id="scoreBoard" class="list-group">
+            <!-- Scores will be dynamically populated -->
+          </ul>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="startGameButton">開始遊戲</button>
+      </div>
+    </div>
+  </div>
+</div>
+  
   <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
