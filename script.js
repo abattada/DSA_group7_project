@@ -66,6 +66,7 @@ function startGame() {
     group: 'shared',
     animation: 150,
     sort: false,
+    filter: ".disabled",
     onAdd: function (evt) {
       const block = evt.item;
     
