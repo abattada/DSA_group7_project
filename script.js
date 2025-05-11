@@ -5,7 +5,10 @@ const timerDisplay = document.getElementById('timer');
 const phaseDisplay = document.getElementById('phase');
 //const startModal = new bootstrap.Modal(document.getElementById('startModal'));
 const startGameButton = document.getElementById('startGameButton');
+const returnButton = document.getElementById('returnButton');
+const submitButton = document.getElementById('submitButton');
 const scoreBoard = document.getElementById('scoreBoard');
+const bucket_title = document.getElementById('bucket_title');
 
 // 遊戲狀態變數
 let numbers = [];
@@ -59,13 +62,24 @@ startGameButton.addEventListener('click', () => {
   startGame();
 });
 
+returnButton.addEventListener('click', () => {
+  hideGame();
+});
+
 function startGame() {
   phase = 0;
   const difficulty = getDifficulty();
   numberOfNumbers = numbersOfDifficulty[difficulty];
   numbers = Array.from({ length: numberOfNumbers }, () => Math.floor(Math.random() * maxNumber) + 1);
   renderPool(numbers);
+
+
+  bucket_title.style.display = 'block';
+  bucketsContainer.style.display = 'flex';
+  submitButton.style.display = 'block';
+  returnButton.style.display = "none";
   bucketsContainer.innerHTML = '';
+
 
   for (let i = 0; i < 10; i++) {
     const container = document.createElement('div');
@@ -192,10 +206,17 @@ function submit() {
     if (phase === 3 || maxNumber <= 999 && phase === 2 || maxNumber <= 99 && phase === 1) {
       clearInterval(timer);
       wait_model = show_modal("恭喜!", `🎉 全部排序完成！總時間：${elapsed} 秒`);
+      phaseDisplay.textContent = '排序完成！';
+      numbers = collected.slice();
+      renderPool(numbers);  // 顯示最終排序
+      bucketsContainer.style.display = 'none';  // 隱藏桶
+      bucket_title.style.display = 'none'
+      submitButton.style.display = 'none';
+      returnButton.style.display = 'block';
+
       wait_model.then(() => {
         saveScore(playerName, elapsed);
         updateScoreBoard();
-        hideGame();
       });
     } else {
       wait_model = show_modal("完成", `✅ ${digitLabels[phase]} 排序正確，進入 ${digitLabels[phase + 1]}`);
